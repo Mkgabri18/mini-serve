@@ -1,5 +1,4 @@
 import { getAllNotes, getNoteById, createNote as createNoteService, updateNote, deleteNote } from "./notes.services.js";
-import { parseJsonBody } from "../utils/parseJson.js";
 
 export async function getNotes(req, res, next) {
   const notes = getAllNotes();
@@ -17,14 +16,17 @@ export async function getNote(req, res, next) {
 }
 
 export async function createNote(req, res, next) {
-  const body = await parseJsonBody(req);
-  const note = createNoteService(body);
+  const note = createNoteService(req.body);
+  if (note.error) {
+    const err = new Error(note.error);
+    err.status = 400;
+    return next(err);
+  }
   res.status(201).json(note);
 }
 
 export async function editNote(req, res, next) {
-  const body = await parseJsonBody(req);
-  const updatedNote = updateNote(req.params.id, body);
+  const updatedNote = updateNote(req.params.id, req.body);
   if (!updatedNote) {
     const err = new Error("Nota non trovata per la modifica");
     err.status = 404;

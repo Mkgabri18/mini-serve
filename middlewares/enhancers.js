@@ -1,15 +1,13 @@
-import url from "url";
-
 export function requestResponseEnhancer(req, res, next) {
   // --- ENHANCE REQUEST ---
   // Analizza l'URL includendo anche le query string (es. ?sort=asc)
-  const parsedUrl = url.parse(req.url, true);
+  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
   
   // Salva il path "pulito" da eventuali query string (es. /notes invece di /notes?sort=asc)
   req.path = parsedUrl.pathname; 
   
   // Salva i parametri estratti (es. { sort: 'asc' })
-  req.query = parsedUrl.query;   
+  req.query = Object.fromEntries(parsedUrl.searchParams);   
 
   // --- ENHANCE RESPONSE ---
   // Aggiunge la scorciatoia per impostare lo status code a catena

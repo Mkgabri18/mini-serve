@@ -1,34 +1,28 @@
-import { runMiddlewares } from "../core/middlewareRunner.js";
+import { createServer } from "../core/server.js";
 import { getNotes, getNote, createNote, editNote, removeNote } from "../notes/notes.controller.js";
-import { route } from "../core/router.js";
-import { notFoundHandler, globalErrorHandler } from "../core/errorHandlers.js";
-import { requestResponseEnhancer } from "../core/enhancers.js";
-
-function logger(req, res, next) {
-  console.log(`${req.method} ${req.url}`);
-  next();
-}
+import { notFoundHandler, globalErrorHandler } from "../middlewares/errorHandlers.js";
+import { requestResponseEnhancer } from "../middlewares/enhancers.js";
+import { jsonBodyParser } from "../middlewares/bodyParser.js";
+import { logger } from "../middlewares/logger.js";
 
 export function createApp() {
-  return function handler(req, res) { 
-    runMiddlewares(
-      [
-        requestResponseEnhancer, // Carica req.query, res.status e res.json
-        logger,
-        
-        // Registrazione Rotte
-        route("GET", "/notes", getNotes),
-        route("GET", "/notes/:id", getNote),
-        route("POST", "/notes", createNote),
-        route("PUT", "/notes/:id", editNote),
-        route("DELETE", "/notes/:id", removeNote),
-        
-        // Fallback e Global Error Middlewares
-        notFoundHandler,
-        globalErrorHandler
-      ],
-      req,
-      res
-    );
-  };
+  const app = createServer();
+
+  // 1. Core Middlewares
+  app.use(requestResponseEnhancer); // Inietta req.query, res.status e res.json
+  app.use(jsonBodyParser);          // Inietta req.body per JSON automatico
+  app.use(logger);
+
+  // 2. Registrazione Rotte (Sintassi Builder)
+  app.get("/notes", getNotes);
+  app.get("/notes/:id", getNote);
+  app.post("/notes", createNote);
+  app.put("/notes/:id", editNote);
+  app.delete("/notes/:id", removeNote);
+
+  // 3. Fallback e Global Error
+  app.use(notFoundHandler);
+  app.use(globalErrorHandler);
+
+  return app.handler; // Espone il delegato per http.createServer in server.js
 }

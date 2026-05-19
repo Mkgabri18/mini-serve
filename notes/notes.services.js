@@ -10,10 +10,14 @@ export function getNoteById(id) {
 }
 
 export function createNote(data) {
+  if (!data || !data.title) {
+    return { error: "Il campo 'title' è obbligatorio" };
+  }
+
   const note = {
     id: idCounter++,
     title: data.title,
-    content: data.content
+    content: data.content || ""
   };
   notes.push(note);
   return note;
@@ -23,7 +27,9 @@ export function updateNote(id, data) {
   const index = notes.findIndex(n => n.id === parseInt(id));
   if (index === -1) return null;
   
-  notes[index] = { ...notes[index], title: data.title, content: data.content };
+  // Merge parziale: sovrascrive solo i campi effettivamente inviati dal client
+  const { id: _ignored, ...fields } = data;
+  notes[index] = { ...notes[index], ...fields };
   return notes[index];
 }
 
