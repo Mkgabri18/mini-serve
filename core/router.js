@@ -6,7 +6,7 @@ export function route(method, pathDefinition, handler) {
     paramNames.push(paramName);
     return "([^/]+)";
   });
-  const pathRegex = new RegExp(`^${regexPath}$`);
+  const pathRegex = new RegExp(`^${regexPath}/?$`);
 
   return async (req, res, next) => {
     if (req.method === method) {

@@ -11,7 +11,7 @@ export function runMiddlewares(middlewares, req, res) {
         return;
       }
       called = true;
-      dispatch(i + 1, nextErr || err);
+      dispatch(i + 1, nextErr);
     }
 
     try {

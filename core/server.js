@@ -24,24 +24,24 @@ export function createServer() {
      * Ogni metodo wrappa il handler dentro route()
      * che lo trasforma in un middleware con matching di path e parametri.
      */
-    get(path, handler) {
-      middlewares.push(route("GET", path, handler));
+    get(path, ...handler) {
+      middlewares.push(route("GET", path, ...handler));
     },
 
-    post(path, handler) {
-      middlewares.push(route("POST", path, handler));
+    post(path, ...handler) {
+      middlewares.push(route("POST", path, ...handler));
     },
 
-    put(path, handler) {
-      middlewares.push(route("PUT", path, handler));
+    put(path, ...handler) {
+      middlewares.push(route("PUT", path, ...handler));
     },
 
-    delete(path, handler) {
-      middlewares.push(route("DELETE", path, handler));
+    delete(path, ...handler) {
+      middlewares.push(route("DELETE", path, ...handler));
     },
 
-    patch(path, handler) {
-      middlewares.push(route("PATCH", path, handler));
+    patch(path, ...handler) {
+      middlewares.push(route("PATCH", path, ...handler));
     },
 
     /**

@@ -1,7 +1,7 @@
 export function requestResponseEnhancer(req, res, next) {
   // --- ENHANCE REQUEST ---
   // Analizza l'URL includendo anche le query string (es. ?sort=asc)
-  const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+  const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   
   // Salva il path "pulito" da eventuali query string (es. /notes invece di /notes?sort=asc)
   req.path = parsedUrl.pathname; 

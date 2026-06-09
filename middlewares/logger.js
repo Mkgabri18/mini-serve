@@ -1,4 +1,8 @@
 export function logger(req, res, next) {
-  console.log(`${req.method} ${req.url}`);
+  const start = Date.now();
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`[${req.method}] ${req.url} - ${res.statusCode} (${duration}ms)`);
+  });
   next();
 }

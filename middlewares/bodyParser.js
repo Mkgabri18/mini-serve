@@ -2,12 +2,19 @@ export function jsonBodyParser(req, res, next) {
   // Parsiamo il body solo per le richieste che solitamente lo prevedono
   if (["POST", "PUT", "PATCH"].includes(req.method)) {
     let body = "";
+    const MAX_SIZE = 1 * 1024 * 1024; // 1 Megabyte
     
     req.on("data", chunk => {
       body += chunk;
+      if (body.length > MAX_SIZE) {
+        // Distrugge la richiesta per evitare consumo ulteriore di risorse
+        req.destroy();
+      }
     });
 
     req.on("end", () => {
+      if (req.destroyed) return;
+      
       if (!body) {
         req.body = {};
         return next();
