@@ -3,17 +3,28 @@ export function jsonBodyParser(req, res, next) {
   if (["POST", "PUT", "PATCH"].includes(req.method)) {
     let body = "";
     const MAX_SIZE = 1 * 1024 * 1024; // 1 Megabyte
+    let limitExceeded = false;
     
     req.on("data", chunk => {
+      if (limitExceeded) return;
+
       body += chunk;
       if (body.length > MAX_SIZE) {
-        // Distrugge la richiesta per evitare consumo ulteriore di risorse
-        req.destroy();
+        limitExceeded = true;
+        req.pause();
+
+        // Send 413 Payload Too Large response gracefully
+        res.status(413).json({ error: "Payload Too Large" });
+
+        // Destroy the socket on the next tick so Node has time to flush the response
+        setImmediate(() => {
+          req.destroy();
+        });
       }
     });
 
     req.on("end", () => {
-      if (req.destroyed) return;
+      if (limitExceeded || req.destroyed) return;
       
       if (!body) {
         req.body = {};
@@ -31,6 +42,7 @@ export function jsonBodyParser(req, res, next) {
     });
 
     req.on("error", (err) => {
+      if (limitExceeded) return;
       next(err);
     });
   } else {
