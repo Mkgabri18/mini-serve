@@ -1,5 +1,19 @@
+import { readFileSync } from "node:fs";
+
 let notes = [];
-let idCounter = 1;
+try {
+  const dataPath = new URL('./notes.json', import.meta.url);
+  notes = JSON.parse(readFileSync(dataPath, 'utf-8'));
+} catch (error) {
+  notes = [];
+}
+
+let idCounter = notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1;
+
+export function resetNotes(newNotes = []) {
+  notes = [...newNotes];
+  idCounter = notes.length > 0 ? Math.max(...notes.map(n => n.id)) + 1 : 1;
+}
 
 export function getAllNotes() {
   return notes;
@@ -26,7 +40,7 @@ export function createNote(data) {
 export function updateNote(id, data) {
   const index = notes.findIndex(n => n.id === parseInt(id));
   if (index === -1) return null;
-  
+
   // Merge parziale: sovrascrive solo i campi effettivamente inviati dal client
   const { id: _ignored, ...fields } = data;
   notes[index] = { ...notes[index], ...fields };
@@ -36,7 +50,7 @@ export function updateNote(id, data) {
 export function deleteNote(id) {
   const index = notes.findIndex(n => n.id === parseInt(id));
   if (index === -1) return false;
-  
+
   notes.splice(index, 1);
   return true;
 }

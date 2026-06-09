@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "title": "Spesa Settimanale",
+    "content": "Comprare latte, uova, pane integrale e caffè."
+  },
+  {
+    "id": 2,
+    "title": "Idee Progetto Mini-Serve",
+    "content": "Aggiungere supporto per i file statici e un router modulare."
+  },
+  {
+    "id": 3,
+    "title": "Allenamento",
+    "content": "Corsa di 5km mercoledì e sessione di forza venerdì."
+  },
+  {
+    "id": 4,
+    "title": "Lista Libri da Leggere",
+    "content": "Clean Code di Robert Martin e Designing Data-Intensive Applications."
+  },
+  {
+    "id": 5,
+    "title": "Promemoria Lavoro",
+    "content": "Inviare il report mensile entro venerdì sera."
+  }
+]

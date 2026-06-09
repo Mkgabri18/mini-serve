@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mini-Serve Notes - Gestione Note Premium</title>
+  <meta name="description" content="Una splendida applicazione per la gestione delle note con memorizzazione locale sincronizzata ed interfaccia scura in vetroresina.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --panel-bg: rgba(255, 255, 255, 0.03);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --primary: hsl(250, 85%, 65%);
+      --primary-hover: hsl(250, 85%, 75%);
+      --accent: hsl(320, 80%, 60%);
+      --danger: hsl(0, 80%, 60%);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg-color) 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100%;
+      max-width: 900px;
+      margin-bottom: 3rem;
+      text-align: center;
+      animation: fadeInDown 0.8s ease;
+    }
+
+    header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--text-main) 30%, var(--primary) 70%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 900px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      animation: fadeInUp 0.8s ease;
+    }
+
+    @media (min-width: 768px) {
+      main {
+        grid-template-columns: 350px 1fr;
+      }
+    }
+
+    /* Card Panels with Glassmorphism */
+    .glass-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    /* Form Styles */
+    .note-form h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--panel-border);
+      border-radius: 12px;
+      padding: 0.8rem 1rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none;
+      border-radius: 12px;
+      padding: 1rem;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Notes Grid */
+    .notes-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .notes-header h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .notes-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.2rem;
+    }
+
+    @media (min-width: 600px) and (max-width: 767px) {
+      .notes-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Individual Note Item */
+    .note-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--panel-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .note-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary), var(--accent));
+      opacity: 0.8;
+    }
+
+    .note-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .note-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .note-content {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .note-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.8rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+
+    .action-btn:hover {
+      color: var(--text-main);
+    }
+
+    .action-btn.delete:hover {
+      color: var(--danger);
+    }
+
+    /* Custom Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: rgba(139, 92, 246, 0.9);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      font-weight: 600;
+      z-index: 1000;
+      transform: translateY(150%);
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .toast.show {
+      transform: translateY(0);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mini-Serve Notes</h1>
+    <p>Memorizzazione locale sincronizzata in tempo reale</p>
+  </header>
+
+  <main>
+    <!-- Left Panel: Create Note Form -->
+    <section class="glass-card note-form">
+      <h2 id="form-title">Crea Nuova Nota</h2>
+      <form id="noteForm">
+        <input type="hidden" id="noteId" value="">
+        <div class="form-group">
+          <label for="title">Titolo</label>
+          <input type="text" id="title" class="form-control" placeholder="Inserisci il titolo..." required autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="content">Contenuto</label>
+          <textarea id="content" class="form-control" placeholder="Scrivi qualcosa di interessante..."></textarea>
+        </div>
+        <button type="submit" class="btn" id="submitBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Salva Nota
+        </button>
+      </form>
+    </section>
+
+    <!-- Right Panel: Notes List -->
+    <section class="notes-section">
+      <div class="notes-header">
+        <h2>Le Mie Note</h2>
+      </div>
+
+      <div id="notesContainer" class="notes-list">
+        <!-- Spaced dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast">Azione completata!</div>
+
+  <script>
+    const STORAGE_KEY = "mini_serve_notes";
+    const notesContainer = document.getElementById("notesContainer");
+    const noteForm = document.getElementById("noteForm");
+    const titleInput = document.getElementById("title");
+    const contentInput = document.getElementById("content");
+    const noteIdInput = document.getElementById("noteId");
+    const formTitle = document.getElementById("form-title");
+    const submitBtn = document.getElementById("submitBtn");
+    const toast = document.getElementById("toast");
+
+    let currentNotes = [];
+
+    // Show custom toast message
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    // Load initial notes from LocalStorage or Backend
+    async function initializeNotes() {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        currentNotes = JSON.parse(cached);
+        console.log("Notes loaded from Browser LocalStorage");
+      } else {
+        console.log("LocalStorage empty, fetching seeds from Server backend...");
+        try {
+          const response = await fetch("/notes");
+          if (response.ok) {
+            currentNotes = await response.json();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(currentNotes));
+            showToast("Note sincronizzate dal server!");
+          }
+        } catch (err) {
+          console.error("Failed to load initial notes from backend", err);
+        }
+      }
+      renderNotes();
+    }
+
+    // Render notes in the container
+    function renderNotes() {
+      notesContainer.innerHTML = "";
+
+      if (currentNotes.length === 0) {
+        notesContainer.innerHTML = `
+          <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem; opacity:0.5;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            <p>Nessuna nota trovata. Inizia creandone una!</p>
+          </div>
+        `;
+        return;
+      }
+
+      currentNotes.forEach(note => {
+        const item = document.createElement("div");
+        item.className = "note-item";
+        item.innerHTML = `
+          <div>
+            <h3 class="note-title">${escapeHTML(note.title)}</h3>
+            <p class="note-content">${escapeHTML(note.content || "")}</p>
+          </div>
+          <div class="note-actions">
+            <button class="action-btn" onclick="editNote(${note.id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              Modifica
+            </button>
+            <button class="action-btn delete" onclick="deleteNote(${note.id})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+              Elimina
+            </button>
+          </div>
+        `;
+        notesContainer.appendChild(item);
+      });
+    }
+
+    // Helper to escape HTML characters
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Submit form (Save / Edit)
+    noteForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+      const id = noteIdInput.value;
+
+      if (!title) return;
+
+      if (id) {
+        // Edit Mode
+        const noteIndex = currentNotes.findIndex(n => n.id === parseInt(id));
+        if (noteIndex !== -1) {
+          currentNotes[noteIndex].title = title;
+          currentNotes[noteIndex].content = content;
+          showToast("Nota modificata con successo!");
+        }
+      } else {
+        // Create Mode
+        const newId = currentNotes.length > 0 ? Math.max(...currentNotes.map(n => n.id)) + 1 : 1;
+        currentNotes.push({ id: newId, title, content });
+        showToast("Nota creata con successo!");
+      }
+
+      // Sync state and reset form
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentNotes));
+      resetForm();
+      renderNotes();
+    });
+
+    // Populate form to edit a note
+    window.editNote = function(id) {
+      const note = currentNotes.find(n => n.id === id);
+      if (!note) return;
+
+      noteIdInput.value = note.id;
+      titleInput.value = note.title;
+      contentInput.value = note.content;
+
+      formTitle.textContent = "Modifica Nota";
+      submitBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+        Salva Modifiche
+      `;
+      titleInput.focus();
+    }
+
+    // Delete a note
+    window.deleteNote = function(id) {
+      if (!confirm("Sei sicuro di voler eliminare questa nota?")) return;
+      currentNotes = currentNotes.filter(n => n.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentNotes));
+      showToast("Nota eliminata!");
+      renderNotes();
+      
+      // If we deleted the note currently being edited, reset form
+      if (noteIdInput.value === String(id)) {
+        resetForm();
+      }
+    }
+
+    // Reset Form to initial state
+    function resetForm() {
+      noteIdInput.value = "";
+      titleInput.value = "";
+      contentInput.value = "";
+      formTitle.textContent = "Crea Nuova Nota";
+      submitBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Salva Nota
+      `;
+    }
+
+    // Init
+    initializeNotes();
+  </script>
+</body>
+</html>
