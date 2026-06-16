@@ -8,6 +8,14 @@
     ".": "./lib/index.js",
     "./middlewares": "./lib/middlewares/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Mkgabri18/mini-serve.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Mkgabri18/mini-serve/issues"
+  },
+  "homepage": "https://github.com/Mkgabri18/mini-serve#readme",
   "files": [
     "lib"
   ],
