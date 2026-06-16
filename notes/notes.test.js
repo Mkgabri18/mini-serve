@@ -4,7 +4,7 @@ import { createNote, getAllNotes, resetNotes } from './notes.services.js';
 
 test('Notes Service', async (t) => {
     beforeEach(() => {
-        resetNotes([]); // Resetta l'array di note per isolare ciascun test
+        resetNotes([]); // Resets the notes array to isolate each test
     });
 
     await t.test('should start with an empty notes list', () => {
@@ -23,6 +23,6 @@ test('Notes Service', async (t) => {
     await t.test('should return an error if title is missing', () => {
         const result = createNote({ content: 'No title here' });
         assert.ok(result.error);
-        assert.equal(result.error, "Il campo 'title' è obbligatorio");
+        assert.equal(result.error, "The field 'title' is required");
     });
 });

@@ -10,7 +10,7 @@ import {
   removeNote,
 } from "../notes/notes.controller.js";
 
-// Creiamo l'app con i middleware built-in abilitati e il logger attivo per sviluppo
+// Create the app with built-in middlewares enabled and the logger active for development
 const app = createMiniServe({
   useEnhancers: true,
   useBodyParser: true,
@@ -19,7 +19,7 @@ const app = createMiniServe({
 
 console.log("registering routes......");
 
-// Rotta per servire il frontend statico (solo per test locali)
+// Route to serve the static frontend (local development tests only)
 app.get("/", (req, res) => {
   try {
     const htmlPath = new URL("./public/index.html", import.meta.url);
@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
     res.end(html);
   } catch (err) {
     res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8" });
-    res.end("Errore nel caricamento del frontend");
+    res.end("Error loading frontend");
   }
 });
 
@@ -38,7 +38,7 @@ app.post("/notes", createNote);
 app.put("/notes/:id", editNote);
 app.delete("/notes/:id", removeNote);
 
-// Aggiungiamo i gestori di errore opzionali alla fine della catena
+// Add optional error handlers at the end of the chain
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
 

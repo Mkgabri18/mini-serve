@@ -1,44 +1,44 @@
 # mini-serve
 
-`mini-serve` è un micro-framework HTTP ultra-leggero e **zero-dependency** per Node.js. È nato come alternativa minimale e nativa a Express per creare API REST, CRUD e server web veloci, mantenendo il pieno controllo sulle performance e sulla configurazione dei middleware.
+`mini-serve` is an ultra-lightweight, **zero-dependency** HTTP framework for Node.js. It is designed as a minimal, native alternative to Express for building REST APIs, CRUD services, and web servers while maintaining full control over performance and middleware configuration.
 
 ---
 
-## Indice
-1. [Caratteristiche principali](#caratteristiche-principali)
-2. [Guida: Come usarlo in un nuovo progetto da zero](#guida-come-usarlo-in-un-nuovo-progetto-da-zero)
-3. [Guida all'API](#guida-allapi)
-4. [Gestione dei Middleware](#gestione-dei-middleware)
-5. [Licenza](#licenza)
+## Table of Contents
+1. [Key Features](#key-features)
+2. [Guide: How to Use It in a New Project from Scratch](#guide-how-to-use-it-in-a-new-project-from-scratch)
+3. [API Guide](#api-guide)
+4. [Middleware Management](#middleware-management)
+5. [License](#license)
 
 ---
 
-## Caratteristiche principali
+## Key Features
 
-* 🚀 **Zero dipendenze esterne**: Utilizza esclusivamente i moduli nativi di Node.js (es. `node:http`, `node:fs`).
-* 🛣️ **Router Express-like**: Supporto nativo per rotte HTTP (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`) e parametri dinamici nell'URL (es. `/api/users/:id`).
-* ⚙️ **Modularità Opt-In**: I middleware built-in (body parser, request/response enhancers, logging) sono disattivati o attivabili a piacimento.
-* 🛡️ **Leggero e Sicuro**: Include un body parser con limite integrato di 1MB sui payload per prevenire attacchi di tipo DOS.
+* 🚀 **Zero external dependencies**: Built entirely on top of Node.js native modules (e.g. `node:http`, `node:fs`).
+* 🛣️ **Express-like Router**: Native support for HTTP methods (`GET`, `POST`, `PUT`, `DELETE`, `PATCH`) and dynamic path parameters (e.g. `/api/users/:id`).
+* ⚙️ **Opt-In Modularity**: Built-in middlewares (body parser, request/response enhancers, logger) are configurable and can be enabled or disabled at will.
+* 🛡️ **Lightweight & Secure**: Includes a built-in JSON body parser with a default 1MB size limit to prevent potential DOS attacks.
 
 ---
 
-## Guida: Come usarlo in un nuovo progetto da zero
+## Guide: How to Use It in a New Project from Scratch
 
-Ecco i passaggi da seguire per creare un nuovo progetto ed utilizzare `mini-serve`.
+Follow these steps to create a new project and use `mini-serve`.
 
-### Step 1: Inizializza il progetto Node.js
-Crea una nuova cartella per il tuo progetto e inizializzala tramite il terminale:
+### Step 1: Initialize the Node.js project
+Create a new directory for your project and initialize it via terminal:
 ```bash
-mkdir mio-nuovo-progetto
-cd mio-nuovo-progetto
+mkdir my-new-project
+cd my-new-project
 npm init -y
 ```
 
-### Step 2: Abilita i moduli ES (ESM)
-Apri il file `package.json` appena generato e aggiungi la riga `"type": "module"`. Questo passaggio è fondamentale in quanto `mini-serve` utilizza la sintassi moderna degli import di ES6:
+### Step 2: Enable ES Modules (ESM)
+Open the newly generated `package.json` file and add the `"type": "module"` property. This step is critical since `mini-serve` uses modern ES6 import syntax:
 ```json
 {
-  "name": "mio-nuovo-progetto",
+  "name": "my-new-project",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -47,118 +47,118 @@ Apri il file `package.json` appena generato e aggiungi la riga `"type": "module"
 }
 ```
 
-### Step 3: Installa `mini-serve`
-Installa il pacchetto tramite npm (puoi installarlo localmente o puntare al percorso se lo stai testando localmente):
+### Step 3: Install `@mkgabri18/mini-serve`
+Install the package using npm:
 ```bash
-npm install mini-serve
+npm install @mkgabri18/mini-serve
 ```
 
-### Step 4: Crea il file del Server (`index.js`)
-Crea un file chiamato `index.js` nella root del tuo progetto e scrivi il seguente codice di esempio:
+### Step 4: Create the Server File (`index.js`)
+Create a file named `index.js` in the root of your project and add the following sample code:
 
 ```javascript
 import http from 'node:http';
-import { createServer } from 'mini-serve';
-import { notFoundHandler, globalErrorHandler } from 'mini-serve/middlewares';
+import { createServer } from '@mkgabri18/mini-serve';
+import { notFoundHandler, globalErrorHandler } from '@mkgabri18/mini-serve/middlewares';
 
-// 1. Inizializza il server con le opzioni desiderate
+// 1. Initialize the server with the desired options
 const app = createServer({
-  useEnhancers: true,  // Abilita res.json(), res.status() e req.query
-  useBodyParser: true, // Parsa automaticamente il JSON per POST/PUT/PATCH
-  useLogger: true      // Mostra i log delle richieste in console
+  useEnhancers: true,  // Enables res.json(), res.status(), and req.query
+  useBodyParser: true, // Automatically parses JSON body for POST/PUT/PATCH
+  useLogger: true      // Logs requests to the console
 });
 
-// 2. Definisci le tue rotte
+// 2. Define your routes
 app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Benvenuto nel mio nuovo server agnostico!' });
+  res.status(200).json({ message: 'Welcome to my new agnostic server!' });
 });
 
-// Rotta con parametri dinamici
+// Route with dynamic path parameters
 app.get('/items/:id', (req, res) => {
   const { id } = req.params;
   res.status(200).json({ itemId: id, queryString: req.query });
 });
 
-// Rotta POST con gestione del body parificato
+// POST route with body parser support
 app.post('/items', (req, res) => {
   const payload = req.body;
   res.status(201).json({ created: payload });
 });
 
-// 3. Registra i middleware di fallback per errori
+// 3. Register fallback and error handling middlewares
 app.use(notFoundHandler);
 app.use(globalErrorHandler);
 
-// 4. Avvia il server tramite il modulo nativo http di Node.js
+// 4. Start the server using Node.js native http module
 const server = http.createServer(app.handler);
 
 server.listen(3000, () => {
-  console.log('Server avviato con successo su http://localhost:3000');
+  console.log('Server successfully started at http://localhost:3000');
 });
 ```
 
-### Step 5: Avvia il server
-Esegui il server tramite il terminale:
+### Step 5: Start the server
+Run the server using your terminal:
 ```bash
 npm start
 ```
 
 ---
 
-## Guida all'API
+## API Guide
 
 ### `createServer(options)`
-Crea un'istanza dell'applicazione. Riceve un oggetto di configurazione per i middleware built-in:
+Creates an application instance. Accepts a configuration object for built-in middlewares:
 
-| Opzione | Tipo | Default | Descrizione |
+| Option | Type | Default | Description |
 |---|---|---|---|
-| `useEnhancers` | `boolean` | `true` | Aggiunge `req.query`, `req.path`, `res.status(code)` e `res.json(data)`. |
-| `useBodyParser` | `boolean` | `true` | Parsa automaticamente i payload JSON in `req.body` (limite max: 1MB). Ritorna `413 Payload Too Large` se superato o `400 Bad Request` in caso di JSON malformato. |
-| `useLogger` | `boolean` | `false` | Stampa a console le richieste ricevute, lo status code e il tempo di elaborazione in ms (es: `[GET] /api/users - 200 (12ms)`). |
+| `useEnhancers` | `boolean` | `true` | Injects `req.query`, `req.path`, `res.status(code)`, and `res.json(data)`. |
+| `useBodyParser` | `boolean` | `true` | Automatically parses JSON payloads into `req.body` (max limit: 1MB). Returns `413 Payload Too Large` if exceeded, or `400 Bad Request` if JSON is malformed. |
+| `useLogger` | `boolean` | `false` | Logs incoming requests, status code, and execution time in ms (e.g.: `[GET] /api/users - 200 (12ms)`). |
 
-L'oggetto `app` restituito espone i seguenti metodi:
-- `app.use(middleware)`: Registra un middleware globale o un gestore errori.
-- `app.get(path, ...handlers)`: Registra una rotta GET.
-- `app.post(path, ...handlers)`: Registra una rotta POST.
-- `app.put(path, ...handlers)`: Registra una rotta PUT.
-- `app.delete(path, ...handlers)`: Registra una rotta DELETE.
-- `app.patch(path, ...handlers)`: Registra una rotta PATCH.
-- `app.handler`: Il delegato nativo `(req, res)` da passare a `http.createServer()`.
+The returned `app` object exposes the following methods:
+- `app.use(middleware)`: Registers a global middleware or an error-handling middleware.
+- `app.get(path, ...handlers)`: Registers a GET route.
+- `app.post(path, ...handlers)`: Registers a POST route.
+- `app.put(path, ...handlers)`: Registers a PUT route.
+- `app.delete(path, ...handlers)`: Registers a DELETE route.
+- `app.patch(path, ...handlers)`: Registers a PATCH route.
+- `app.handler`: The native callback `(req, res)` to pass to `http.createServer()`.
 
 ---
 
-## Gestione dei Middleware
+## Middleware Management
 
-I middleware seguono il classico pattern `(req, res, next)`:
+Middlewares follow the standard `(req, res, next)` pattern:
 
 ```javascript
 app.use((req, res, next) => {
-  console.log('Richiesta in transito...');
-  next(); // Passa al middleware successivo
+  console.log('Request received...');
+  next(); // Pass control to the next middleware
 });
 ```
 
-### Gestione degli Errori globali
-Se passi un errore a `next(err)`, lo stack salterà tutti i middleware standard fino a raggiungere un middleware di errore, identificato dall'avere 4 parametri `(err, req, res, next)`:
+### Global Error Handling
+If you pass an error to `next(err)`, the middleware runner skips all standard middlewares to execute error-handling middlewares, which are identified by having 4 arguments `(err, req, res, next)`:
 
 ```javascript
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.writeHead(500, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ error: 'Errore generico del server' }));
+  res.end(JSON.stringify({ error: 'Internal Server Error' }));
 });
 ```
 
-Puoi anche usare gli handler predefiniti importandoli da sottomodulo:
+You can also import and use the pre-built error handlers from their submodule:
 ```javascript
-import { notFoundHandler, globalErrorHandler } from 'mini-serve/middlewares';
+import { notFoundHandler, globalErrorHandler } from '@mkgabri18/mini-serve/middlewares';
 
-app.use(notFoundHandler);     // Gestisce i 404 per rotte non registrate
-app.use(globalErrorHandler);  // Cattura ed elabora in sicurezza gli errori generici
+app.use(notFoundHandler);     // Handles 404 for unregistered routes
+app.use(globalErrorHandler);  // Safely catches and processes uncaught errors
 ```
 
 ---
 
-## Licenza
+## License
 
-Questo progetto è rilasciato sotto licenza [MIT](LICENSE).
+This project is licensed under the [MIT](LICENSE) License.

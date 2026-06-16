@@ -25,7 +25,7 @@ export function getNoteById(id) {
 
 export function createNote(data) {
   if (!data || !data.title) {
-    return { error: "Il campo 'title' è obbligatorio" };
+    return { error: "The field 'title' is required" };
   }
 
   const note = {
@@ -41,7 +41,7 @@ export function updateNote(id, data) {
   const index = notes.findIndex(n => n.id === parseInt(id));
   if (index === -1) return null;
 
-  // Merge parziale: sovrascrive solo i campi effettivamente inviati dal client
+  // Partial merge: overrides only fields actually sent by the client
   const { id: _ignored, ...fields } = data;
   notes[index] = { ...notes[index], ...fields };
   return notes[index];

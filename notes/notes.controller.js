@@ -8,7 +8,7 @@ export async function getNotes(req, res, next) {
 export async function getNote(req, res, next) {
   const note = getNoteById(req.params.id);
   if (!note) {
-    const err = new Error("Nota non trovata");
+    const err = new Error("Note not found");
     err.status = 404;
     return next(err);
   }
@@ -28,7 +28,7 @@ export async function createNote(req, res, next) {
 export async function editNote(req, res, next) {
   const updatedNote = updateNote(req.params.id, req.body);
   if (!updatedNote) {
-    const err = new Error("Nota non trovata per la modifica");
+    const err = new Error("Note not found for editing");
     err.status = 404;
     return next(err);
   }
@@ -38,7 +38,7 @@ export async function editNote(req, res, next) {
 export async function removeNote(req, res, next) {
   const success = deleteNote(req.params.id);
   if (!success) {
-    const err = new Error("Nota non trovata per l'eliminazione");
+    const err = new Error("Note not found for deletion");
     err.status = 404;
     return next(err);
   }
