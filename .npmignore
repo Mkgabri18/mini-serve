@@ -1,9 +1,7 @@
 # Codice applicativo e demo da blacklistare
 notes/
 src/
-core/
-middlewares/
-utils/
+
 
 # Configurazione locale e documentazione di sviluppo
 .git/
