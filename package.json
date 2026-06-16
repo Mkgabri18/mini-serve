@@ -1,14 +1,31 @@
 {
   "name": "mini-serve",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "A tiny, zero-dependency HTTP framework for Node.js",
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./middlewares": "./lib/middlewares/index.js"
+  },
+  "files": [
+    "lib"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "node src/server.js",
-    "test": "node --test"
+    "test": "node --test notes/notes.test.js"
   },
-  "keywords": [],
+  "keywords": [
+    "http",
+    "framework",
+    "server",
+    "middleware",
+    "router",
+    "zero-dependency"
+  ],
   "author": "",
-  "license": "ISC",
-  "type": "module"
+  "license": "MIT"
 }

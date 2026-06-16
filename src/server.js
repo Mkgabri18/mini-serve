@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
-import { createApp } from "./app.js";
+import { createServer as createMiniServe } from "../lib/index.js";
+import { notFoundHandler, globalErrorHandler } from "../lib/middlewares/index.js";
 import {
   getNotes,
   getNote,
@@ -8,26 +9,27 @@ import {
   removeNote,
 } from "../notes/notes.controller.js";
 
-/**
- * Registra le rotte del dominio "notes" sull'istanza dell'app.
- * Per usare mini-serve con un dominio diverso, sostituisci questa funzione
- * e i relativi import con il tuo controller.
- *
- * @param {object} app - L'istanza del server creata da createServer()
- */
-function registerRoutes(app) {
-  console.log("registering routes......")
-  app.get("/notes", getNotes);
-  app.get("/notes/:id", getNote);
-  app.post("/notes", createNote);
-  app.put("/notes/:id", editNote);
-  app.delete("/notes/:id", removeNote)
-}
+// Creiamo l'app con i middleware built-in abilitati e il logger attivo per sviluppo
+const app = createMiniServe({
+  useEnhancers: true,
+  useBodyParser: true,
+  useLogger: true
+});
 
-const app = createApp(registerRoutes);
+console.log("registering routes......");
+app.get("/notes", getNotes);
+app.get("/notes/:id", getNote);
+app.post("/notes", createNote);
+app.put("/notes/:id", editNote);
+app.delete("/notes/:id", removeNote);
 
-const server = createServer(app);
+// Aggiungiamo i gestori di errore opzionali alla fine della catena
+app.use(notFoundHandler);
+app.use(globalErrorHandler);
+
+const server = createServer(app.handler);
 
 server.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
 });
+

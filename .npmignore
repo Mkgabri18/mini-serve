@@ -1,0 +1,15 @@
+# Codice applicativo e demo da blacklistare
+notes/
+src/
+core/
+middlewares/
+utils/
+
+# Configurazione locale e documentazione di sviluppo
+.git/
+.gitignore
+.vscode/
+npm_packaging_analysis.md
+implementation_plan.md
+task.md
+walkthrough.md
